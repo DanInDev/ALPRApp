@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "412947598315",
+    "project_id": "alprapp-e9335",
+    "storage_bucket": "alprapp-e9335.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:412947598315:android:28dd2f43184941072da7ae",
+        "android_client_info": {
+          "package_name": "com.alprapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjbK8Q2e9jzg_qLMaewcOs27-vCN6FSNY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
