@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { PermissionsAndroid, Platform } from 'react-native';
 
 const useCameraPermission = () => {
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [cameraPermission, setCameraPermission] = useState<boolean | null>(null);
 
-  const requestPermission = async () => {
+  const requestCameraPermission = async () => {
     try {
       if (Platform.OS === 'android') {
         const granted = await PermissionsAndroid.request(
@@ -17,43 +17,39 @@ const useCameraPermission = () => {
             buttonPositive: 'OK',
           },
         );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          setHasPermission(true);
-        } else {
-          setHasPermission(false);
-        }
+        setCameraPermission(granted === PermissionsAndroid.RESULTS.GRANTED);
       } else {
         // For iOS or other platforms, handle permission accordingly
-        setHasPermission(true); // Assume permission is granted for simplicity
+        setCameraPermission(true); // Assume permission is granted for simplicity
       }
     } catch (error) {
       console.error('Error requesting camera permission:', error);
-      setHasPermission(false);
+      setCameraPermission(false);
     }
   };
 
   useEffect(() => {
-    const checkPermission = async () => {
+    const checkCameraPermission = async () => {
       try {
         if (Platform.OS === 'android') {
           const status = await PermissionsAndroid.check(
             PermissionsAndroid.PERMISSIONS.CAMERA,
           );
-          setHasPermission(status);
+          setCameraPermission(status);
         } else {
           // For iOS or other platforms, handle permission accordingly
-          setHasPermission(true); // Assume permission is granted for simplicity
+          setCameraPermission(true); // Assume permission is granted for simplicity
         }
       } catch (error) {
         console.error('Error checking camera permission:', error);
-        setHasPermission(false);
+        setCameraPermission(false);
       }
     };
 
-    checkPermission();
+    checkCameraPermission();
   }, []);
 
-  return { hasPermission, requestPermission };
+  return { cameraPermission, requestCameraPermission };
 };
 
 export default useCameraPermission;
