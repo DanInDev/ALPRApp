@@ -4,23 +4,26 @@ import useCameraPermission from '../hooks/useCameraPermission';
 import useStoragePermission from '../hooks/useStoragePermission';
 import { Camera, PhotoFile, useCameraDevice } from 'react-native-vision-camera';
 import { cleanupCache, deleteTemporaryFile } from '../CleanupLogic';
+import MlkitOcr, { MlkitOcrResult } from 'react-native-mlkit-ocr';
 
 const ScannerScreen: React.FC = () => {
   const { cameraPermission, requestCameraPermission } = useCameraPermission();
   const { storagePermission, requestStoragePermission } = useStoragePermission();
   const [isTakingPicture, setIsTakingPicture] = useState(false);
   const [capturedPhoto, setCapturedPhoto] = useState<PhotoFile | null>(null);
+  const [ocrResult, setOcrResult] = useState<string | null>(null); // State to hold OCR result
   const cameraRef = useRef<Camera | null>(null);
   const device = useCameraDevice('back');
 
   useEffect(() => {
     const displayTimer = setTimeout(() => {
       setCapturedPhoto(null);
+      setOcrResult(null); // Clear OCR result after 5 seconds
     }, 5000);
     return () => {
       clearTimeout(displayTimer);
     };
-  }, [capturedPhoto]);
+  }, [capturedPhoto, ocrResult]);
 
   useEffect(() => {
     return () => {
@@ -48,14 +51,28 @@ const ScannerScreen: React.FC = () => {
   const handleTakePicture = async () => {
     if (cameraRef.current) {
       setIsTakingPicture(true);
+      //Take Picture
       try {
         const photo: PhotoFile = await cameraRef.current.takePhoto();
         setCapturedPhoto(photo);
+                // Perform OCR on the captured photo
+          try {
+            const resultFromFile: MlkitOcrResult = await MlkitOcr.detectFromFile(`file://${photo.path}`);
+            const ocrResult = resultFromFile.toString();
+                  setOcrResult(ocrResult); // Update the OCR result state
+                  console.log('SetOcrResult is: ', ocrResult)
+                } catch (error) {
+                  console.error('Error doing OCR:', error);
+                  setOcrResult(null); // Clear OCR result on error
+                }
+                
       } catch (error) {
         console.error('Error taking photo:', error);
       } finally {
         setIsTakingPicture(false);
       }
+
+
     }
   };
 
@@ -82,6 +99,11 @@ const ScannerScreen: React.FC = () => {
       {capturedPhoto && (
         <View style={styles.previewContainer}>
           <Image style={styles.previewImage} source={{ uri: `file://${capturedPhoto.path}` }} />
+        </View>
+      )}
+      {ocrResult && (
+        <View style={styles.ocrResultContainer}>
+          <Text style={styles.ocrResultText}>{ocrResult}</Text>
         </View>
       )}
       <TouchableOpacity style={styles.takePictureButton} onPress={handleTakePicture} disabled={isTakingPicture}>
@@ -113,6 +135,16 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 5,
+  },
+  ocrResultContainer: {
+    position: 'absolute',
+    top: 150, // Adjust the position as needed
+    alignSelf: 'center',
+  },
+  ocrResultText: {
+    color: 'black',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
 
